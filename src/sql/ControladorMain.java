@@ -1,6 +1,6 @@
 package sql;
 
-import ControladorMySql.ControladorMySql;
+import ControladorMySql.PrincipalMySql;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -29,7 +29,7 @@ public class ControladorMain {
         validarUrl = new validarUrl(urlR);        
     }
         
-    ControladorMySql mySql = new ControladorMySql();
+    PrincipalMySql mySql = new PrincipalMySql();
     private Runnable monitora = new Runnable() {
         @Override
         public void run() {
